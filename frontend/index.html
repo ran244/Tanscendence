@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      (() => {
+        const key = 'ma-theme'
+        let theme = 'light'
+        try {
+          const savedTheme = window.localStorage.getItem(key)
+          if (savedTheme === 'light' || savedTheme === 'dark') theme = savedTheme
+        } catch {
+          // Storage can be unavailable in privacy-restricted browser contexts.
+        }
+        document.documentElement.dataset.theme = theme
+      })()
+    </script>
+    <style>
+      html { background-color: #f3e4c9; color-scheme: light; }
+      html[data-theme='dark'] { background-color: #1b324d; color-scheme: dark; }
+      body { margin: 0; background-color: inherit; }
+    </style>
+    <link rel="icon" type="image/png" href="/src/assets/logo.png" />
+    <title>Mystery Auctions</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

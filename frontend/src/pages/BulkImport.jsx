@@ -1,0 +1,9 @@
+import { useState } from 'react'
+import Layout from '../components/Layout'
+import { post } from '../api/client'
+
+export default function BulkImport() {
+  const [kind, setKind] = useState('products'); const [eventId, setEventId] = useState(''); const [json, setJson] = useState('[\n  {"name":"Imported item","description":"","category":"Antiquities","available":true}\n]'); const [result, setResult] = useState(null); const [error, setError] = useState('')
+  const run = async (dryRun) => { try { const rows = JSON.parse(json); const path = kind === 'products' ? '/import/products/' : `/import/lots/${eventId}/`; setResult(await post(path, { dry_run: dryRun, rows })); setError('') } catch (err) { setError(err.message) } }
+  return <Layout><section style={{ padding: '30px 0 90px', maxWidth: 760 }}><h2>Bulk import</h2><p>Validate first; a dry run never changes the database. Imports are all-or-nothing when validation fails.</p><div className="field"><label>Data type</label><select className="input" value={kind} onChange={(event) => setKind(event.target.value)}><option value="products">Products</option><option value="lots">Lots</option></select></div>{kind === 'lots' && <div className="field"><label>Draft event ID</label><input className="input" type="number" value={eventId} onChange={(event) => setEventId(event.target.value)} required /></div>}<div className="field"><label>JSON rows (maximum 500)</label><textarea className="textarea" rows="14" value={json} onChange={(event) => setJson(event.target.value)} /></div><div style={{ display: 'flex', gap: 10 }}><button className="btn btn-outline" onClick={() => run(true)}>Validate dry run</button><button className="btn btn-primary" onClick={() => run(false)}>Import</button></div>{error && <p className="form-error">{error}</p>}{result && <pre className="panel" style={{ overflow: 'auto' }}>{JSON.stringify(result, null, 2)}</pre>}</section></Layout>
+}

@@ -1,0 +1,133 @@
+/* =========================================================
+   Mystery Auctions — Design Tokens
+   Palette sourced directly from the Figma design + brand kit.
+   ========================================================= */
+
+:root {
+  color-scheme: light;
+
+  /* --- brand palette (from the provided Figma color swatches) --- */
+  --navy-900: #0a2947;
+  --navy-800: #0d2a46;
+  --navy-700: #163a5e;
+  --brown-600: #8b5e3c;
+  --brown-500: #a97a52;
+  --brown-tan: #c9a382;
+  --sage-500: #d3d4c0;
+  --sage-600: #b7b9a0;
+  --cream-100: #faf3e6;
+  --cream-200: #f3e4c9;
+  --cream-300: #ecd9b6;
+  --input-fill: #c9c2ae;
+  --ink: #1c1a16;
+  --ink-soft: #4a453c;
+  --border-strong: #171512;
+  --danger: #a13d3d;
+  --success: #3d6b4f;
+
+  /* --- semantic (light theme, default) --- */
+  --bg: var(--cream-200);
+  --bg-elevated: var(--cream-100);
+  --panel: var(--sage-500);
+  --panel-strong: var(--sage-600);
+  --header-accent: var(--navy-900);
+  --text: var(--ink);
+  --text-soft: var(--ink-soft);
+  --text-on-navy: #f3e4c9;
+  --border: var(--border-strong);
+  --input-bg: var(--input-fill);
+  --pill-bg: var(--brown-tan);
+  --pill-border: var(--brown-600);
+  --shadow: 0 6px 24px rgba(10, 41, 71, 0.14);
+
+  /* --- type --- */
+  --font-display: 'Cinzel Variable', Georgia, serif;
+  --font-serif: Georgia, serif;
+  --font-body: 'Inter Variable', system-ui, sans-serif;
+
+  --radius-pill: 999px;
+  --radius-md: 14px;
+  --radius-lg: 22px;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #0f1720;
+  --bg-elevated: #16212c;
+  --panel: #1e2b26;
+  --panel-strong: #24352f;
+  --header-accent: #0a2947;
+  --text: #f0ead9;
+  --text-soft: #c8bfa8;
+  --text-on-navy: #f3e4c9;
+  --border: #d3c9ab;
+  --input-bg: #535552;
+  --pill-bg: #8b5e3c;
+  --pill-border: #c9a382;
+  --shadow: 0 6px 28px rgba(0, 0, 0, 0.5);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  max-width: 100%;
+  overflow-x: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  letter-spacing: 0.02em;
+  color: var(--header-accent);
+  margin: 0;
+}
+
+[data-theme='dark'] h1,
+[data-theme='dark'] h2,
+[data-theme='dark'] h3 {
+  color: var(--text);
+}
+
+p {
+  color: var(--text-soft);
+}
+
+:focus-visible {
+  outline: 3px solid var(--brown-500);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: var(--brown-tan);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

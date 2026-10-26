@@ -1,0 +1,155 @@
+services:
+  db:
+    image: postgres:16
+    container_name: mystery_db
+    env_file:
+      - .env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - transcendence
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: mystery_redis
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb"]
+    volumes:
+      - redis_data:/data
+    networks:
+      - transcendence
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+    container_name: mystery_backend
+    env_file:
+      - .env
+    environment:
+      - SERVICE_NAME=rest
+      - RUN_STARTUP_TASKS=true
+    command: ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--timeout", "60", "--access-logfile", "-"]
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - media_data:/app/media
+      - private_upload_data:/app/private_uploads
+    networks:
+      - transcendence
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8000/api/health/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+
+  websocket:
+    build:
+      context: ./backend
+    container_name: mystery_websocket
+    env_file:
+      - .env
+    environment:
+      - SERVICE_NAME=asgi
+    command: ["daphne", "-b", "0.0.0.0", "-p", "8080", "config.asgi:application"]
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - media_data:/app/media
+      - private_upload_data:/app/private_uploads
+    networks:
+      - transcendence
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/api/health/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: unless-stopped
+
+  worker:
+    build:
+      context: ./backend
+    container_name: mystery_worker
+    env_file:
+      - .env
+    environment:
+      - SERVICE_NAME=worker
+    command: ["celery", "-A", "config", "worker", "--loglevel=info", "--concurrency=2"]
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - media_data:/app/media
+    networks:
+      - transcendence
+    restart: unless-stopped
+
+  beat:
+    build:
+      context: ./backend
+    container_name: mystery_beat
+    env_file:
+      - .env
+    environment:
+      - SERVICE_NAME=beat
+    command: ["celery", "-A", "config", "beat", "--loglevel=info"]
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - transcendence
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: mystery_frontend
+    networks:
+      - transcendence
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: ./nginx
+    container_name: mystery_nginx
+    depends_on:
+      backend:
+        condition: service_healthy
+      websocket:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+    ports:
+      - "${HTTPS_PORT:-8443}:443"
+    volumes:
+      - media_data:/srv/media:ro
+    networks:
+      - transcendence
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  media_data:
+  private_upload_data:
+
+networks:
+  transcendence:
+    driver: bridge
